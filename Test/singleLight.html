@@ -51,6 +51,22 @@
 
     <script src="../jquery.js"></script>
     <script>
+      send_command = function(room, kind, object, value) {
+        console.log(
+          'sending ' + room + ' ' + kind + ' ' + object + ' ' + value
+        );
+        homeControlUrl = 'http://192.168.1.5:8002/home';
+        $.ajax({
+          type: 'PUT',
+          dataType: 'html',
+          url: homeControlUrl + '/' +
+            room + '/' + kind + '/' + object + '/' + value,
+          success: function(data){
+            console.log(data);
+          }
+        })
+      }
+
       $().ready(function() {
         var room = '';
         var kind = '';
@@ -75,9 +91,7 @@
             );
             value = 'on';
           }
-          console.log(
-            'sending ' + room + ' ' + kind + ' ' + object + ' ' + value
-          );
+          send_command(room, kind, object, value)
         });
       });
     </script>
