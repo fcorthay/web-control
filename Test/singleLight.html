@@ -1,0 +1,86 @@
+<html>
+  <head>
+    <title>single light control</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <style type="text/css">
+      html, body, form, fieldset, p, div, h1, h2, h3, h4, h5, h6 {
+        margin:0;
+        padding:0;
+        -webkit-text-size-adjust:none;
+      }
+      body {
+        background-color: #FFFFBF;
+      }
+      a {
+        text-decoration:none;
+      }
+      button.buttons {
+        position: absolute;
+        margin:0;
+        border: none;
+        background-color: transparent;
+        background-repeat: no-repeat;
+        cursor: pointer;
+      }
+      #ceiling {
+        left: 190px;
+        top: 50px;
+        width: 40px;
+        background-image: url(../Icons/lightCeilingOff.png);
+        height: 40px;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- SVG graphics ...................................................... -->
+
+    <svg
+      id="svg" width="322" height="463"
+      position: absolute; left: 0px; top: 0px;
+    >
+      <rect
+        x='150' y='30' width='120' height='80' rx='10' ry='10' fill='#9FBFFF'
+      />
+    </svg>
+
+    <!-- Button definition ................................................. -->
+
+    <button type="button" class="buttons" id="ceiling" />
+
+    <!-- Button handling javascript ........................................ -->
+
+    <script src="../jquery.js"></script>
+    <script>
+      $().ready(function() {
+        var room = '';
+        var kind = '';
+        var object = '';
+        var value = '';
+
+        $('#ceiling').on('click', function() {
+          room = 'study';
+          kind = 'lights';
+          object = 'ceiling';
+          if ($(this).attr('on_off') == 1) {
+            $(this).attr('on_off', 0);
+            $(this).css(
+              'background-image', 'url(../Icons/lightCeilingOff.png)'
+            );
+            value = 'off';
+          }
+          else {
+            $(this).attr('on_off', 1);
+            $(this).css(
+              'background-image', 'url(../Icons/lightCeilingOn.png)'
+            );
+            value = 'on';
+          }
+          console.log(
+            'sending ' + room + ' ' + kind + ' ' + object + ' ' + value
+          );
+        });
+      });
+    </script>
+
+  </body>
+</html>
