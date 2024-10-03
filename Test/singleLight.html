@@ -29,7 +29,6 @@
         left: 190px;
         top: 50px;
         width: 40px;
-        background-image: url(../Icons/lightCeilingOff.png);
         height: 40px;
       }
     </style>
@@ -59,8 +58,9 @@
       //
       const homeControlUrl = 'http://192.168.1.5:8002/home';
       const imagesLocation = '../Icons/';
+      const updatePeriod = 3*1000;
 
-      sendCommand = function(room, kind, object, value) {
+      function sendCommand(room, kind, object, value) {
         console.log(
           'sending ' + room + ' ' + kind + ' ' + object + ' ' + value
         );
@@ -69,14 +69,60 @@
           dataType: 'html',
           url: homeControlUrl + '/' +
             room + '/' + kind + '/' + object + '/' + value,
-          success: function(data){
-            console.log(data);
+          // success: function(reply){
+          //   console.log(reply);
+          // }
+        })
+      }
+
+      function updateValue(buttonId) {
+        room = $(buttonId).attr('room');
+        kind = $(buttonId).attr('kind');
+        object = $(buttonId).attr('object');
+        //console.log('getting ' + room + ' ' + kind + ' ' + object);
+        $.ajax({
+          type: 'Get',
+          dataType: 'html',
+          url: homeControlUrl + '/' + room + '/' + kind + '/' + object,
+          success: function(reply){
+            value = reply.replace(/\n/gm, '');
+            value = value.replace(/.*<body>/, '');
+            value = value.replace(/.*<p>/, '');
+            value = value.replace(/.*is\s*"/, '');
+            value = value.replace(/".*/, '');
+            if ($(buttonId).attr('lastChange') == 'actuated') {
+              $(buttonId).attr('lastChange', 'updated');
+            } else {
+              if ($(buttonId).attr('value') != value) {
+                console.log(
+                  'changing ' + $(buttonId).attr('room') + ' ' +
+                  $(buttonId).attr('kind') + ' ' + $(buttonId).attr('object') +
+                  ' to "' + value + '"'
+                );
+                $(buttonId).attr('value', value);
+                if (value == 'on') {
+                  $(buttonId).css(
+                    'background-image', $(buttonId).attr('imageOn')
+                  );
+                } else {
+                  $(buttonId).css(
+                    'background-image', $(buttonId).attr('imageOff')
+                  );
+                }
+              }
+            }
           }
         })
       }
 
-      toggleOnOff = function(buttonId) {
-        var image = $(buttonId).attr('image')
+      function updateOnOff(buttons) {
+        for (buttonId of buttons) {
+          updateValue(buttonId);
+        }
+      }
+
+      function toggleOnOff(buttonId) {
+        $(buttonId).attr('lastChange', 'actuated');
         if ($(buttonId).attr('value') == 'on') {
           $(buttonId).attr('value', 'off');
           $(buttonId).css(
@@ -98,12 +144,17 @@
       // -----------------------------------------------------------------------
       // button controls
       //
-      $().ready(function() {
+      buttonList = ['#ceiling'];
+
+      $(document).ready(function() {
+
+        setInterval(updateOnOff, updatePeriod, buttonList);
 
         $('#ceiling').attr({
           room: 'study', kind: 'lights', object: 'ceiling', value: 'off',
           imageOff: 'url(' + imagesLocation + 'lightCeilingOff.png)',
-          imageOn : 'url(' + imagesLocation + 'lightCeilingOn.png)'
+          imageOn : 'url(' + imagesLocation + 'lightCeilingOn.png)',
+          lastChange: 'updated'
         })
         $('#ceiling').css('background-image', $('#ceiling').attr('imageOff'));
         $('#ceiling').on('click', function() {toggleOnOff($(this))});
