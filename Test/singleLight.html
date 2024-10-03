@@ -1,7 +1,10 @@
 <html>
   <head>
     <title>single light control</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <meta
+      name="viewport" content="width=device-width,
+      initial-scale=1.0, maximum-scale=1.0"
+    >
     <style type="text/css">
       html, body, form, fieldset, p, div, h1, h2, h3, h4, h5, h6 {
         margin:0;
@@ -51,11 +54,16 @@
 
     <script src="../jquery.js"></script>
     <script>
-      send_command = function(room, kind, object, value) {
+      // -----------------------------------------------------------------------
+      // functions
+      //
+      const homeControlUrl = 'http://192.168.1.5:8002/home';
+      const imagesLocation = '../Icons/';
+
+      sendCommand = function(room, kind, object, value) {
         console.log(
           'sending ' + room + ' ' + kind + ' ' + object + ' ' + value
         );
-        homeControlUrl = 'http://192.168.1.5:8002/home';
         $.ajax({
           type: 'PUT',
           dataType: 'html',
@@ -67,34 +75,40 @@
         })
       }
 
-      $().ready(function() {
-        var room = '';
-        var kind = '';
-        var object = '';
-        var value = '';
+      toggleOnOff = function(buttonId) {
+        var image = $(buttonId).attr('image')
+        if ($(buttonId).attr('value') == 'on') {
+          $(buttonId).attr('value', 'off');
+          $(buttonId).css(
+            'background-image', $(buttonId).attr('imageOff')
+          );
+        }
+        else {
+          $(buttonId).attr('value', 'on');
+          $(buttonId).css(
+            'background-image', $(buttonId).attr('imageOn')
+          );
+        }
+        sendCommand(
+          $(buttonId).attr('room'), $(buttonId).attr('kind'),
+          $(buttonId).attr('object'), $(buttonId).attr('value')
+        )
+      }
 
-        $('#ceiling').on('click', function() {
-          room = 'study';
-          kind = 'lights';
-          object = 'ceiling';
-          if ($(this).attr('on_off') == 1) {
-            $(this).attr('on_off', 0);
-            $(this).css(
-              'background-image', 'url(../Icons/lightCeilingOff.png)'
-            );
-            value = 'off';
-          }
-          else {
-            $(this).attr('on_off', 1);
-            $(this).css(
-              'background-image', 'url(../Icons/lightCeilingOn.png)'
-            );
-            value = 'on';
-          }
-          send_command(room, kind, object, value)
-        });
+      // -----------------------------------------------------------------------
+      // button controls
+      //
+      $().ready(function() {
+
+        $('#ceiling').attr({
+          room: 'study', kind: 'lights', object: 'ceiling', value: 'off',
+          imageOff: 'url(' + imagesLocation + 'lightCeilingOff.png)',
+          imageOn : 'url(' + imagesLocation + 'lightCeilingOn.png)'
+        })
+        $('#ceiling').css('background-image', $('#ceiling').attr('imageOff'));
+        $('#ceiling').on('click', function() {toggleOnOff($(this))});
+
       });
     </script>
-
   </body>
 </html>
